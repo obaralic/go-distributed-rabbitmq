@@ -1,0 +1,33 @@
+
+#-----------------------------------------------------------------------------
+# Installing RabbitMQ and Erlang dependencies
+#-----------------------------------------------------------------------------
+sudo su
+apt-get update
+apt-get upgrade
+apt-get install erlang
+apt-get install rabbitmq-server
+
+#-----------------------------------------------------------------------------
+# Setting up RabbitMQ
+#-----------------------------------------------------------------------------
+systemctl enable rabbitmq-server
+systemctl start rabbitmq-server
+systemctl status rabbitmq-server
+rabbitmq-plugins enable rabbitmq_management
+
+#-----------------------------------------------------------------------------
+# Creating admin user on http://localhost:15672/#/
+#-----------------------------------------------------------------------------
+rabbitmqctl add_user admin admin
+rabbitmqctl set_user_tags admin administrator
+rabbitmqctl set_permissions -p / admin ".*" ".*" ".*"
+
+
+#-----------------------------------------------------------------------------
+# Useful RabbitMQ commands
+#-----------------------------------------------------------------------------
+rabbitmq-plugins list
+rabbitmqctl status
+rabbitmqctl list_queues
+rabbitmqctl cluster_status
