@@ -21,7 +21,7 @@ func main() {
 }
 
 func serverMock() {
-	connection, channel, queue := common.GetMessageQueue()
+	connection, channel, queue := common.GetMessageQueue("Info")
 	defer connection.Close()
 	defer channel.Close()
 
