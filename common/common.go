@@ -24,12 +24,6 @@ const (
 	FANOUT_EXCHANGE  = "amq.fanout"
 )
 
-// Constants related to the RabbitMQ queues.
-const (
-	// Queue name used to communicate names of available queues.
-	SENSOR_LIST_QUEUE = "SensorList"
-)
-
 // -----------------------------------------------------------------------------
 // GetChannel - Helper function that returns amqp channele for the given URL.
 //
@@ -66,18 +60,6 @@ func GetQueue(name string, channel *amqp.Channel) *amqp.Queue {
 }
 
 // -----------------------------------------------------------------------------
-// GetSensorQueue - Helper function that returns sensor list queue.
-// Sensor list queue is used for acquiring list of available sensors.
-//
-// amqp.Channel - provides a path fo communication over connection.
-// -----------------------------------------------------------------------------
-func GetSensorQueue(channel *amqp.Channel) *amqp.Queue {
-	return GetQueue(SENSOR_LIST_QUEUE, channel)
-}
-
-// -----------------------------------------------------------------------------
-// @Depricated
-// -----------------------------------------------------------------------------
 // GetMessageQueue - Helper function that returns message queue whose publishing
 // is associated with the default exchange.
 //
@@ -85,7 +67,7 @@ func GetSensorQueue(channel *amqp.Channel) *amqp.Queue {
 // amqp.Channel - provides a path fo communication over connection.
 // amqp.Queue - message queue.
 // -----------------------------------------------------------------------------
-func GetMessageQueue(name string) (*amqp.Connection, *amqp.Channel, *amqp.Queue) {
+func GetDirectQueue(name string) (*amqp.Connection, *amqp.Channel, *amqp.Queue) {
 	connection, channel := GetChannel(URL_GUEST)
 	queue := GetQueue(name, channel)
 	return connection, channel, queue

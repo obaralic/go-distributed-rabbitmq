@@ -71,7 +71,7 @@ func work() {
 
 	// Create reusable data buffer and surrounding encoder.
 	buffer := new(bytes.Buffer)
-	encoder := gob.NewEncoder(buffer)
+	var encoder *gob.Encoder
 
 	// Wait for the timer tick by blocking on unbuffered channel.
 	for range tick() {
@@ -79,6 +79,7 @@ func work() {
 
 		// Reset buffer content and encode readout.
 		buffer.Reset()
+		encoder = gob.NewEncoder(buffer)
 		readout := dto.NewReadout(*name, value, time.Now())
 		encoder.Encode(readout)
 
