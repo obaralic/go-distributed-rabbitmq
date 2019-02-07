@@ -21,6 +21,7 @@ const (
 const (
 	// Default exchange is represented with the empty srting.
 	DEFAULT_EXCHANGE = ""
+	FANOUT_EXCHANGE  = "amq.fanout"
 )
 
 // Constants related to the RabbitMQ queues.
@@ -95,12 +96,14 @@ func GetMessageQueue(name string) (*amqp.Connection, *amqp.Channel, *amqp.Queue)
 // to the rest of the system using given advertisement queue.
 //
 // name - that is advertised to the system.
-// amqp.Queue - message queue used for name advertisement.
 // amqp.Channel - provides a path fo communication over connection.
 // -----------------------------------------------------------------------------
-func Advertise(name string, queue *amqp.Queue, channel *amqp.Channel) {
+func Advertise(name string, channel *amqp.Channel) {
 	message := amqp.Publishing{Body: []byte(name)}
-	channel.Publish(DEFAULT_EXCHANGE, queue.Name, false, false, message)
+	// Fanout exchange doesn't need queue name to determin where the message goes.
+	// It will send the message to every copy of the queue bound to exchange.
+	// It's up to the consumer to create message queue.
+	channel.Publish(FANOUT_EXCHANGE, "", false, false, message)
 }
 
 // -----------------------------------------------------------------------------

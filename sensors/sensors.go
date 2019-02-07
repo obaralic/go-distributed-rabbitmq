@@ -67,7 +67,7 @@ func work() {
 
 	// Publish sensor name to the system using sensor advertisement queue.
 	queue := common.GetQueue(*name, channel)
-	common.Advertise(*name, common.GetSensorQueue(channel), channel)
+	common.Advertise(*name, channel)
 
 	// Create reusable data buffer and surrounding encoder.
 	buffer := new(bytes.Buffer)
