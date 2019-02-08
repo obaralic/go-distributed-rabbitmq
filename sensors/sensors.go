@@ -16,6 +16,8 @@ import (
 	"math/rand"
 	"strconv"
 	"time"
+
+	"github.com/streadway/amqp"
 )
 
 const millis = 1000
@@ -66,8 +68,13 @@ func work() {
 	defer channel.Close()
 
 	// Publish sensor name to the system using sensor advertisement queue.
-	queue := common.GetQueue(*name, channel)
+	dataQueue := common.GetQueue(*name, channel)
 	common.Advertise(*name, channel)
+
+	// Listen for the discovery messages
+	discoveryQueue := common.GetQueue(common.DISCOVERY_QUEUE, channel)
+	channel.QueueBind(discoveryQueue.Name, "", common.DISCOVERY_EXCHANGE, false, nil)
+	go onDiscoveryRequest(discoveryQueue.Name, channel)
 
 	// Create reusable data buffer and surrounding encoder.
 	buffer := new(bytes.Buffer)
@@ -83,8 +90,24 @@ func work() {
 		readout := dto.NewReadout(*name, value, time.Now())
 		encoder.Encode(readout)
 
-		common.Send(buffer.Bytes(), queue, channel)
+		common.Send(buffer.Bytes(), dataQueue, channel)
 		log.Printf("Sensor: %s sent value: %v\n", *name, readout.Value)
+	}
+}
+
+// -----------------------------------------------------------------------------
+// onDiscoveryRequest - Listen for discovery requests to advertise sensor.
+//
+// queue - name of the message queue.
+// amqp.Channel - provides a path fo communication over connection.
+// -----------------------------------------------------------------------------
+func onDiscoveryRequest(queue string, channel *amqp.Channel) {
+	requests, _ := channel.Consume(queue, "", true, false, false, false, nil)
+
+	for range requests {
+		log.Println("Sensor: DiscoveryRequest received")
+		common.Advertise(*name, channel)
+		log.Println("Sensor: Advertisment sent")
 	}
 }
 

@@ -1,14 +1,14 @@
 // -----------------------------------------------------------------------------
-// Coordinator package used for defining coordinator as a queue listener.
+// Coordinator package used for defining queue listener and event aggregator.
 // -----------------------------------------------------------------------------
 package coordinator
 
 import (
 	"bytes"
 	"encoding/gob"
-	"fmt"
 	"godistributed-rabbitmq/common"
 	"godistributed-rabbitmq/common/dto"
+	"log"
 
 	"github.com/streadway/amqp"
 )
@@ -18,14 +18,10 @@ import (
 // sensor data queues, receiving messages and translating them into events.
 // -----------------------------------------------------------------------------
 type SensorListener struct {
-	// Connection to RabbitMQ.
-	connection *amqp.Connection
-
-	// Channel created with the connection.
-	channel *amqp.Channel
-
-	// Subscribed sensors with their delivery channels.
-	sources map[string]<-chan amqp.Delivery
+	connection *amqp.Connection                // Connection to RabbitMQ.
+	channel    *amqp.Channel                   // Channel created with the connection.
+	sources    map[string]<-chan amqp.Delivery // Subscribed sensors with their delivery channels.
+	aggregator *EventAggregator                // Used for funneling events.
 }
 
 // -----------------------------------------------------------------------------
@@ -33,7 +29,8 @@ type SensorListener struct {
 // -----------------------------------------------------------------------------
 func NewListener() *SensorListener {
 	listener := SensorListener{
-		sources: make(map[string]<-chan amqp.Delivery),
+		sources:    make(map[string]<-chan amqp.Delivery),
+		aggregator: NewAggregator(),
 	}
 
 	listener.connection, listener.channel = common.GetChannel(common.URL_GUEST)
@@ -56,7 +53,11 @@ func (listener *SensorListener) Start() {
 	advertisements, _ := listener.channel.Consume(
 		queue.Name, "", true, false, false, false, nil)
 
+	// Send sensor discovery request.
+	listener.DiscoveryRequest()
+
 	for advertisement := range advertisements {
+		log.Println("SensorListener: Advertisment received")
 
 		sensorName := string(advertisement.Body)
 
@@ -83,20 +84,36 @@ func (listener *SensorListener) Stop() {
 }
 
 // -----------------------------------------------------------------------------
+// DiscoveryRequest - Method used for discovering already present sensors.
+// -----------------------------------------------------------------------------
+func (listener *SensorListener) DiscoveryRequest() {
+	// Using fanout to send messages to every queue bound to this exchange.
+	listener.channel.ExchangeDeclare(
+		common.DISCOVERY_EXCHANGE, common.FANOUT, false, false, false, false, nil)
+
+	log.Println("SensorListener: DiscoveryRequest sent")
+	listener.channel.Publish(
+		common.DISCOVERY_EXCHANGE, common.DISCOVERY_QUEUE, false, false, amqp.Publishing{})
+}
+
+// -----------------------------------------------------------------------------
 // observe - Method used for observing incoming messages
 // received from the subscribed sensor channel.
 //
 // sensor - incoming channel of amqp.Delivery containing sensor messages.
 // -----------------------------------------------------------------------------
 func (listener *SensorListener) observe(sensor <-chan amqp.Delivery) {
-	for data := range sensor {
-		payload := data.Body
-		reader := bytes.NewReader(payload)
+	for payload := range sensor {
+		reader := bytes.NewReader(payload.Body)
 		decoder := gob.NewDecoder(reader)
 
 		readout := new(dto.Readout)
 		decoder.Decode(readout)
+		log.Printf("Received readout: %v\n", readout)
 
-		fmt.Printf("Received readout: %v\n", readout)
+		// Event is prefixed sensor name
+		event := Event("MessageReceived_" + payload.RoutingKey)
+		data := dto.NewEventData(readout.Name, readout.Value, readout.Timestamp)
+		listener.aggregator.Publish(event, *data)
 	}
 }

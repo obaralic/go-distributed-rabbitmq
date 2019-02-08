@@ -34,3 +34,21 @@ func NewReadout(name string, readout float64, timestamp time.Time) *Readout {
 		Value:     readout,
 		Timestamp: timestamp}
 }
+
+// -----------------------------------------------------------------------------
+// EventData - Represents event data that is sent by the aggregator.
+// -----------------------------------------------------------------------------
+type EventData struct {
+	Readout // Timestamp of the sensor readout.
+}
+
+// -----------------------------------------------------------------------------
+// NewEventData - Creates new event data transport object.
+// -----------------------------------------------------------------------------
+func NewEventData(name string, readout float64, timestamp time.Time) *EventData {
+	return &EventData{
+		Readout: Readout{
+			Name:      name,
+			Value:     readout,
+			Timestamp: timestamp}}
+}

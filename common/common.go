@@ -12,16 +12,29 @@ import (
 
 // Constants related to the RabbitMQ URLs.
 const (
-
 	//URL of the guest user.
 	URL_GUEST = "amqp://guest@localhost:5672"
 )
 
-// Constants related to the RabbitMQ exchanges.
+// Constants related to the RabbitMQ exchanges names.
 const (
-	// Default exchange is represented with the empty srting.
-	DEFAULT_EXCHANGE = ""
-	FANOUT_EXCHANGE  = "amq.fanout"
+	DEFAULT_EXCHANGE   = ""                 // Default direct exchange
+	FANOUT_EXCHANGE    = "amq.fanout"       // Default fanout exchange
+	DISCOVERY_EXCHANGE = "sensor.discovery" // Custom exchange used for sending discovery requests.
+	// TODO: Similar can be done to support sensor unsubscribe action.
+)
+
+// Const related to the exchange types.
+const (
+	DIRECT = "direct"
+	FANOUT = "fanout"
+	TOPIC  = "topic"
+	HEADER = "header"
+)
+
+// Const related to the message queues.
+const (
+	DISCOVERY_QUEUE = "discovery.queue"
 )
 
 // -----------------------------------------------------------------------------
