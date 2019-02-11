@@ -4,10 +4,9 @@
 package coordinator
 
 import (
+	"godistributed-rabbitmq/common"
 	"goutils/slices"
 )
-
-type Event string
 
 type Any interface{}
 
@@ -15,14 +14,14 @@ type Any interface{}
 // EventSubscriber - Interface for providing trigger subscription for event.
 // -----------------------------------------------------------------------------
 type EventSubscriber interface {
-	Subscribe(event Event, trigger func(Any))
+	Subscribe(event common.Event, trigger func(Any))
 }
 
 // -----------------------------------------------------------------------------
 // EventUnsubscriber - Interface for providing trigger unsubscription from event.
 // -----------------------------------------------------------------------------
 type EventUnsubscriber interface {
-	Unsubscribe(event Event, trigger func(Any))
+	Unsubscribe(event common.Event, trigger func(Any))
 }
 
 // -----------------------------------------------------------------------------
@@ -39,7 +38,7 @@ type EventRaiser interface {
 type EventAggregator struct {
 
 	// Mapping event name into trigger function.
-	triggers map[Event][]func(Any)
+	triggers map[common.Event][]func(Any)
 }
 
 // -----------------------------------------------------------------------------
@@ -47,7 +46,7 @@ type EventAggregator struct {
 // -----------------------------------------------------------------------------
 func NewAggregator() *EventAggregator {
 	return &EventAggregator{
-		triggers: make(map[Event][]func(Any)),
+		triggers: make(map[common.Event][]func(Any)),
 	}
 }
 
@@ -57,7 +56,7 @@ func NewAggregator() *EventAggregator {
 // event - Name of the event of interest.
 // trigger - Callback function triggered for the given event.
 // -----------------------------------------------------------------------------
-func (aggregator *EventAggregator) Subscribe(event Event, trigger func(Any)) {
+func (aggregator *EventAggregator) Subscribe(event common.Event, trigger func(Any)) {
 	aggregator.triggers[event] = append(aggregator.triggers[event], trigger)
 }
 
@@ -67,7 +66,7 @@ func (aggregator *EventAggregator) Subscribe(event Event, trigger func(Any)) {
 // event - Name of the event of interest.
 // trigger - Callback function triggered for the given event.
 // -----------------------------------------------------------------------------
-func (aggregator *EventAggregator) Unsubscribe(event Event, trigger func(Any)) {
+func (aggregator *EventAggregator) Unsubscribe(event common.Event, trigger func(Any)) {
 	if triggers := aggregator.triggers[event]; triggers != nil {
 		remove := slices.IndexOf(len(triggers), func(i int) bool {
 			// Predicate for comparing function addresses and removing pased trigger function.
@@ -84,7 +83,7 @@ func (aggregator *EventAggregator) Unsubscribe(event Event, trigger func(Any)) {
 // event - Name of the event of interest.
 // data - Event data that is being sent.
 // -----------------------------------------------------------------------------
-func (aggregator *EventAggregator) Publish(event Event, data Any) {
+func (aggregator *EventAggregator) Publish(event common.Event, data Any) {
 
 	if triggers := aggregator.triggers[event]; triggers != nil {
 		for _, trigger := range triggers {

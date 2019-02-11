@@ -52,3 +52,14 @@ func NewEventData(name string, readout float64, timestamp time.Time) *EventData 
 			Value:     readout,
 			Timestamp: timestamp}}
 }
+
+// -----------------------------------------------------------------------------
+// Convert - Converts event data into readout.
+// -----------------------------------------------------------------------------
+func Convert(eventData EventData) *Readout {
+	return &Readout{
+		Name:      eventData.Name,
+		Value:     eventData.Value,
+		Timestamp: eventData.Timestamp,
+	}
+}

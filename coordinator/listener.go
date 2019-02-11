@@ -27,10 +27,10 @@ type SensorListener struct {
 // -----------------------------------------------------------------------------
 // NewListener - Creates new sensor listener.
 // -----------------------------------------------------------------------------
-func NewListener() *SensorListener {
+func NewListener(aggregator *EventAggregator) *SensorListener {
 	listener := SensorListener{
 		sources:    make(map[string]<-chan amqp.Delivery),
-		aggregator: NewAggregator(),
+		aggregator: aggregator,
 	}
 
 	listener.connection, listener.channel = common.GetChannel(common.URL_GUEST)
@@ -61,7 +61,7 @@ func (listener *SensorListener) Start() {
 		log.Println("SensorListener: New sensor received")
 
 		sensorName := string(advertisement.Body)
-		listener.aggregator.Publish(Event("SensorDiscovered"), sensorName)
+		listener.aggregator.Publish(common.SENSOR_DISCOVER_EVENT, sensorName)
 		sensor, _ := listener.channel.Consume(sensorName, "", true, false, false, false, nil)
 
 		if listener.sources[sensorName] == nil {
@@ -112,7 +112,7 @@ func (listener *SensorListener) observe(sensor <-chan amqp.Delivery) {
 		log.Printf("Received readout: %v\n", readout)
 
 		// Event is prefixed sensor name
-		event := Event("MessageReceived_" + payload.RoutingKey)
+		event := common.NewEvent(common.MESSAGE_RECEIVED_EVENT, payload.RoutingKey)
 		data := dto.NewEventData(readout.Name, readout.Value, readout.Timestamp)
 		listener.aggregator.Publish(event, *data)
 	}

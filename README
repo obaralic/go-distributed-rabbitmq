@@ -36,3 +36,41 @@ rabbitmqctl cluster_status
 # Go RabbitMQ Client Library
 #-------------------------------------------------------------------------------
 go get github.com/streadway/amqp
+
+#-------------------------------------------------------------------------------
+# Install PostgreSQL
+#-------------------------------------------------------------------------------
+sudo apt-get update
+sudo apt-get install postgresql postgresql-contrib
+ls /etc/postgresql/<version>/main/
+service postgresql status
+
+
+#-------------------------------------------------------------------------------
+# Command line tool
+#-------------------------------------------------------------------------------
+man psql
+sudo su postgres
+psql
+
+\l  # List databases
+\du # List roles
+
+#-------------------------------------------------------------------------------
+# Change default user password and create new user with proper rights
+#-------------------------------------------------------------------------------
+ALTER USER postgres WITH PASSWORD 'admin';
+CREATE USER go_rabbitmq WITH PASSWORD 'goadmin';
+ALTER USER go_rabbitmq WITH SUPERUSER;
+DROP USER <user>;
+
+#-------------------------------------------------------------------------------
+# Install pgAdmin 3 from the Ubuntu Software Center
+#-------------------------------------------------------------------------------
+Host: 127.0.0.1
+Port: 5432
+
+#-------------------------------------------------------------------------------
+# Go PostgreSQL Connector https://godoc.org/github.com/lib/pq
+#-------------------------------------------------------------------------------
+go get github.com/lib/pq

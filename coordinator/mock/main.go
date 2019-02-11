@@ -5,9 +5,13 @@ import (
 	"godistributed-rabbitmq/coordinator"
 )
 
+var consumer *coordinator.StorageConsumer
+
 func main() {
 	fmt.Println("Starting sensor listener...")
-	listener := coordinator.NewListener()
+	aggregator := coordinator.NewAggregator()
+	consumer = coordinator.NewStorageConsumer(aggregator)
+	listener := coordinator.NewListener(aggregator)
 	defer listener.Stop()
 
 	go listener.Start()

@@ -25,7 +25,7 @@ const (
 	// TODO: Similar can be done to support sensor unsubscribe action.
 )
 
-// Const related to the exchange types.
+// Constants related to the exchange types.
 const (
 	DIRECT = "direct"
 	FANOUT = "fanout"
@@ -33,10 +33,26 @@ const (
 	HEADER = "header"
 )
 
-// Const related to the message queues.
+// Constants related to the message queues.
 const (
-	DISCOVERY_QUEUE = "discovery.queue"
+	DISCOVERY_QUEUE   = "discovery.queue"
+	PERSISTENCE_QUEUE = "persistence.queue"
 )
+
+type Event string
+
+// Constants related to suppoerted event types.
+const (
+	SENSOR_DISCOVER_EVENT  = Event("SensorDiscovered")
+	MESSAGE_RECEIVED_EVENT = Event("MessageReceived")
+)
+
+//-----------------------------------------------------------------------------
+// NewEvent - Creates specific event based on source event and qualifier.
+//-----------------------------------------------------------------------------
+func NewEvent(event Event, qualifier string) Event {
+	return event + Event("_"+qualifier)
+}
 
 // -----------------------------------------------------------------------------
 // GetChannel - Helper function that returns amqp channele for the given URL.
