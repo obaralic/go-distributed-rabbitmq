@@ -12,8 +12,9 @@ import (
 
 // Constants related to the RabbitMQ URLs.
 const (
-	//URL of the guest user.
+	// https://www.rabbitmq.com/uri-spec.html
 	URL_GUEST = "amqp://guest@localhost:5672"
+	URL_ADMIN = "amqp://admin:admin@localhost:5672"
 )
 
 // Constants related to the RabbitMQ exchanges names.
@@ -60,14 +61,14 @@ func GetChannel(url string) (*amqp.Connection, *amqp.Channel) {
 // name - name of the requested queue.
 // amqp.Channel - provides a path fo communication over connection.
 // -----------------------------------------------------------------------------
-func GetQueue(name string, channel *amqp.Channel) *amqp.Queue {
+func GetQueue(name string, channel *amqp.Channel, autoDelete bool) *amqp.Queue {
 	queue, error := channel.QueueDeclare(
-		name,  //name
-		false, //durable
-		false, //autoDelete
-		false, //exclusive
-		false, //noWait
-		nil)   //args
+		name,       //name
+		false,      //durable
+		autoDelete, //autoDelete
+		false,      //exclusive
+		false,      //noWait
+		nil)        //args
 	FailOnError(error, "Failed to declare a queue")
 	return &queue
 }
@@ -82,7 +83,7 @@ func GetQueue(name string, channel *amqp.Channel) *amqp.Queue {
 // -----------------------------------------------------------------------------
 func GetDirectQueue(name string) (*amqp.Connection, *amqp.Channel, *amqp.Queue) {
 	connection, channel := GetChannel(URL_GUEST)
-	queue := GetQueue(name, channel)
+	queue := GetQueue(name, channel, false)
 	return connection, channel, queue
 }
 

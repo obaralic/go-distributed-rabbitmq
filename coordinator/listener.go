@@ -44,7 +44,7 @@ func NewListener() *SensorListener {
 // -----------------------------------------------------------------------------
 func (listener *SensorListener) Start() {
 	// Passing "" will result with unique queue name creation by RabbitMQ.
-	queue := common.GetQueue("", listener.channel)
+	queue := common.GetQueue("", listener.channel, true)
 
 	// Rebind queue from default exchange to the fanout.
 	listener.channel.QueueBind(queue.Name, "", common.FANOUT_EXCHANGE, false, nil)
@@ -55,14 +55,14 @@ func (listener *SensorListener) Start() {
 
 	// Send sensor discovery request.
 	listener.DiscoveryRequest()
+	log.Println("SensorListener: Listening for new sensors")
 
 	for advertisement := range advertisements {
-		log.Println("SensorListener: Advertisment received")
+		log.Println("SensorListener: New sensor received")
 
 		sensorName := string(advertisement.Body)
-
-		sensor, _ := listener.channel.Consume(
-			sensorName, "", true, false, false, false, nil)
+		listener.aggregator.Publish(Event("SensorDiscovered"), sensorName)
+		sensor, _ := listener.channel.Consume(sensorName, "", true, false, false, false, nil)
 
 		if listener.sources[sensorName] == nil {
 			listener.sources[sensorName] = sensor

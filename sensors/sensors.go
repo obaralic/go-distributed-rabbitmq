@@ -68,11 +68,11 @@ func work() {
 	defer channel.Close()
 
 	// Publish sensor name to the system using sensor advertisement queue.
-	dataQueue := common.GetQueue(*name, channel)
+	dataQueue := common.GetQueue(*name, channel, false)
 	common.Advertise(*name, channel)
 
 	// Listen for the discovery messages
-	discoveryQueue := common.GetQueue(common.DISCOVERY_QUEUE, channel)
+	discoveryQueue := common.GetQueue(common.DISCOVERY_QUEUE, channel, true)
 	channel.QueueBind(discoveryQueue.Name, "", common.DISCOVERY_EXCHANGE, false, nil)
 	go onDiscoveryRequest(discoveryQueue.Name, channel)
 
