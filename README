@@ -60,8 +60,8 @@ psql
 # Change default user password and create new user with proper rights
 #-------------------------------------------------------------------------------
 ALTER USER postgres WITH PASSWORD 'admin';
-CREATE USER go_rabbitmq WITH PASSWORD 'goadmin';
-ALTER USER go_rabbitmq WITH SUPERUSER;
+CREATE USER goadmin WITH PASSWORD 'goadmin';
+ALTER USER goadmin WITH SUPERUSER;
 DROP USER <user>;
 
 #-------------------------------------------------------------------------------
