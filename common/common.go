@@ -19,10 +19,12 @@ const (
 
 // Constants related to the RabbitMQ exchanges names.
 const (
-	DEFAULT_EXCHANGE   = ""                 // Default direct exchange
-	FANOUT_EXCHANGE    = "amq.fanout"       // Default fanout exchange
-	DISCOVERY_EXCHANGE = "sensor.discovery" // Custom exchange used for sending discovery requests.
-	// TODO: Similar can be done to support sensor unsubscribe action.
+	DEFAULT_EXCHANGE          = ""                 // Default direct exchange
+	FANOUT_EXCHANGE           = "amq.fanout"       // Default fanout exchange
+	DISCOVERY_EXCHANGE        = "sensor.discovery" // Custom exchange used for sending discovery requests.
+	WEBAPP_SOURCE_EXCHANGE    = "webapp.sources"
+	WEBAPP_READINGS_EXCHANGE  = "webapp.readings"
+	WEBAPP_DISCOVERY_EXCHANGE = "webapp.discovery"
 )
 
 // Constants related to the exchange types.
@@ -35,8 +37,9 @@ const (
 
 // Constants related to the message queues.
 const (
-	DISCOVERY_QUEUE   = "discovery.queue"
-	PERSISTENCE_QUEUE = "persistence.queue"
+	DISCOVERY_QUEUE        = "discovery.queue"
+	PERSISTENCE_QUEUE      = "persistence.queue"
+	WEBAPP_DISCOVERY_QUEUE = "webapp.discovery.queue"
 )
 
 type Event string

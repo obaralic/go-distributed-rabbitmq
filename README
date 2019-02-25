@@ -74,3 +74,8 @@ Port: 5432
 # Go PostgreSQL Connector https://godoc.org/github.com/lib/pq
 #-------------------------------------------------------------------------------
 go get github.com/lib/pq
+
+#-------------------------------------------------------------------------------
+# Go web sockets connector
+#-------------------------------------------------------------------------------
+go get github.com/gorilla/websocket
